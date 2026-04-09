@@ -6,10 +6,6 @@ using namespace std;
 
 void testPackUnpackDebug(const SensorData& original) {
     QByteArray packet = PacketBuilder::pack(original);
-
-    // Распечатай пакет в hex
-    std::cout << "Packet: " << packet.toHex().toStdString() << std::endl;
-
     SensorData decoded = PacketParser::parse(packet).value();
 
     std::cout << "Original: x=" << (int)original.x
@@ -34,21 +30,17 @@ void test(const SensorData& original)
     QByteArray packet = PacketBuilder::pack(original);
     SensorData decoded = PacketParser::parse(packet).value();
 
-    if (original == decoded) {
-        std::cout << "✅ Test passed!" << std::endl;
-    } else {
-        std::cout << "❌ Test failed!" << std::endl;
-    }
+    if (original == decoded)
+        std::cout << "Test passed!" << std::endl;
+    else
+        std::cout << "Test failed!" << std::endl;
+
 }
 
 int main() {
-    // Обычные значения
-    testPackUnpackDebug({42, -20, 128, 2, 1, 5.0f, 100});
+    //testPackUnpackDebug({42, -20, 128, 2, 1, 5.0f, 100});
     test({42, -20, 128, 2, 1, 5.0f, 100});
-
-    // Граничные значения
     test({0, -32, 0, 0, 0, -12.7f, 0});
     test({63, 31, 255, 3, 3, 12.8f, 130});
-
     return 0;
 }
