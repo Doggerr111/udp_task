@@ -9,13 +9,13 @@ QByteArray PacketBuilder::pack(const SensorData &data)
     uint8_t y = static_cast<uint8_t>(data.y) & 0x3F;
     word1 |= (y << 8);
     uint16_t word2 = 0;
-    word2 |= (data.v & 0xFF << 0);
-    word2 |= (data.m & 0x03 << 8);
-    word2 |= (data.s & 0x03 << 12);
+    word2 |= ((data.v & 0xFF) << 0);
+    word2 |= ((data.m & 0x03) << 8);
+    word2 |= ((data.s & 0x03) << 12);
     uint16_t word3 = 0;
     uint8_t a = static_cast<uint8_t>((data.a + 12.7) * 10 + 0.5);
     word3 |= (a << 0);
-    word3 |= (data.p & 0xFF << 8);
+    word3 |= ((data.p & 0xFF) << 8);
     //uint16_t word4 = 0;
 
     packet[0] = static_cast<char>(word1);
