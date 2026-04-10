@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>755</width>
-    <height>565</height>
+    <width>671</width>
+    <height>572</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,7 +24,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="connectionPage">
        <property name="sizePolicy">
@@ -159,13 +159,26 @@
                 <layout class="QHBoxLayout" name="horizontalLayout_5">
                  <item>
                   <widget class="QLabel" name="labelX">
+                   <property name="minimumSize">
+                    <size>
+                     <width>105</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="text">
                     <string>Координата X</string>
                    </property>
                   </widget>
                  </item>
-                 <item alignment="Qt::AlignRight">
-                  <widget class="QLineEdit" name="lineEditX"/>
+                 <item>
+                  <widget class="QSpinBox" name="spinBoxX">
+                   <property name="minimum">
+                    <number>0</number>
+                   </property>
+                   <property name="maximum">
+                    <number>63</number>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -181,13 +194,26 @@
                 <layout class="QHBoxLayout" name="horizontalLayout_7">
                  <item>
                   <widget class="QLabel" name="labelY">
+                   <property name="minimumSize">
+                    <size>
+                     <width>105</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="text">
                     <string>Координата Y</string>
                    </property>
                   </widget>
                  </item>
-                 <item alignment="Qt::AlignRight">
-                  <widget class="QLineEdit" name="lineEditY"/>
+                 <item>
+                  <widget class="QSpinBox" name="spinBoxY">
+                   <property name="minimum">
+                    <number>-32</number>
+                   </property>
+                   <property name="maximum">
+                    <number>31</number>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -203,13 +229,23 @@
                 <layout class="QHBoxLayout" name="horizontalLayout_12">
                  <item>
                   <widget class="QLabel" name="labelSpeed">
+                   <property name="minimumSize">
+                    <size>
+                     <width>105</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="text">
                     <string>Скорость</string>
                    </property>
                   </widget>
                  </item>
-                 <item alignment="Qt::AlignRight">
-                  <widget class="QLineEdit" name="lineEditSpeed"/>
+                 <item>
+                  <widget class="QSpinBox" name="spinBoxSpeed">
+                   <property name="maximum">
+                    <number>255</number>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -225,13 +261,23 @@
                 <layout class="QHBoxLayout" name="horizontalLayout_11">
                  <item>
                   <widget class="QLabel" name="labelMode">
+                   <property name="minimumSize">
+                    <size>
+                     <width>105</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="text">
                     <string>Режим работы</string>
                    </property>
                   </widget>
                  </item>
-                 <item alignment="Qt::AlignRight">
-                  <widget class="QLineEdit" name="lineEditMode"/>
+                 <item>
+                  <widget class="QSpinBox" name="spinBoxMode">
+                   <property name="maximum">
+                    <number>3</number>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -247,13 +293,23 @@
                 <layout class="QHBoxLayout" name="horizontalLayout_8">
                  <item>
                   <widget class="QLabel" name="labelState">
+                   <property name="minimumSize">
+                    <size>
+                     <width>105</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="text">
                     <string>Состояние</string>
                    </property>
                   </widget>
                  </item>
-                 <item alignment="Qt::AlignRight">
-                  <widget class="QLineEdit" name="lineEditState"/>
+                 <item>
+                  <widget class="QSpinBox" name="spinBoxState">
+                   <property name="maximum">
+                    <number>3</number>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -269,13 +325,26 @@
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
                  <item>
                   <widget class="QLabel" name="labelAcceleration">
+                   <property name="minimumSize">
+                    <size>
+                     <width>105</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="text">
                     <string>Ускорение</string>
                    </property>
                   </widget>
                  </item>
-                 <item alignment="Qt::AlignRight">
-                  <widget class="QLineEdit" name="lineEditAcceleration"/>
+                 <item>
+                  <widget class="QDoubleSpinBox" name="doubleSpinBoxAcceleration">
+                   <property name="minimum">
+                    <double>-12.699999999999999</double>
+                   </property>
+                   <property name="maximum">
+                    <double>12.800000000000001</double>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -291,13 +360,23 @@
                 <layout class="QHBoxLayout" name="horizontalLayout_10">
                  <item>
                   <widget class="QLabel" name="labelPower">
+                   <property name="minimumSize">
+                    <size>
+                     <width>105</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="text">
                     <string>Мощь</string>
                    </property>
                   </widget>
                  </item>
-                 <item alignment="Qt::AlignRight">
-                  <widget class="QLineEdit" name="lineEditPower"/>
+                 <item>
+                  <widget class="QSpinBox" name="spinBoxPower">
+                   <property name="maximum">
+                    <number>130</number>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -353,7 +432,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>755</width>
+     <width>671</width>
      <height>22</height>
     </rect>
    </property>
