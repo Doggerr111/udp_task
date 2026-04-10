@@ -8,7 +8,10 @@ UDPServer::UDPServer(QObject *parent)
 bool UDPServer::startServer(quint16 port)
 {
     if (!mUdpSocket->bind(QHostAddress::Any, port))
-        return false;   //bind не удался (порт занят, нет прав и т.д.)
+    {
+        emit error(mUdpSocket->errorString());
+        return false;
+    }
 
     connect(mUdpSocket, &QUdpSocket::readyRead, this, &UDPServer::onReadyRead);
     return true;

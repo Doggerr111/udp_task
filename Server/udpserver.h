@@ -15,6 +15,7 @@ private slots:
 signals:
     void dataReceived(const QByteArray& data, const QHostAddress& clientAddr,
                       quint16 clientPort);
+    void error(const QString& message);
 private:
     QUdpSocket* mUdpSocket;
 };
