@@ -48,7 +48,8 @@ void ServerWindow::setupWidgets()
     ui->tableWidgetClients->setHorizontalHeaderLabels({"IP","Порт","Количество ошибок"});
     ui->tableWidgetClients->resizeColumnsToContents();
     ui->tableWidgetClients->setSortingEnabled(true);
-
+    ui->tableWidgetClients->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->textEditLog->setReadOnly(true);
     QIntValidator *portValidator = new QIntValidator(1, 65535, this);
     ui->lineEditPort->setValidator(portValidator);
 }

@@ -12,7 +12,7 @@ ClientWindow::ClientWindow(QWidget *parent)
     ui->stackedWidget->setCurrentIndex(CONNECTION_PAGE_INDX);
     QIntValidator *portValidator = new QIntValidator(1, 65535, this);
     ui->lineEditPort->setValidator(portValidator);
-
+    ui->textEditResponse->setReadOnly(true);
     connect(mController.get(), &ClientController::error, this, &ClientWindow::onControllerError);
     connect(mController.get(), &ClientController::serverConfigured, this, &ClientWindow::onServerConfigured);
     connect(mController.get(), &ClientController::configurationCleared, this, &ClientWindow::onServerConfigurationCleared);
