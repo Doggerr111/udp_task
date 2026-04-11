@@ -58,13 +58,13 @@ void ServerController::onServerDataReceived(const QByteArray &data, const QHostA
         response.append(char(0));   // идентификатор сообщения
         response.append(char(valid ? 1 : 0));  // флаг корректности
         mServer->sendResponse(response, clientAddress, clientPort);
-        emit clientDataReceived(clientAddress.toString(), clientPort, sensorData, valid);
+        emit clientDataReceived(client.getFormatedAddress(), clientPort, sensorData, valid);
         if (!valid) client.errorCount++;
     }
     if (isNew)
-        emit clientAdded(clientAddress.toString(), clientPort, client.errorCount);
+        emit clientAdded(client.getFormatedAddress(), clientPort, client.errorCount);
     else
-        emit clientUpdated(clientAddress.toString(), clientPort, client.errorCount);
+        emit clientUpdated(client.getFormatedAddress(), clientPort, client.errorCount);
 }
 
 void ServerController::onServerError(const QString &message)
@@ -79,7 +79,7 @@ void ServerController::onClientTimer()
     {
         if (it->lastSeen.secsTo(now) > INACTIVE_TIMEOUT_SEC)  // удаляем после бездействия
         {
-            emit clientRemoved(it->address.toString(), it->port);
+            emit clientRemoved(it->getFormatedAddress(), it->port);
             it = mClients.erase(it);
 
         }

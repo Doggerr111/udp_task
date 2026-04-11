@@ -37,6 +37,18 @@ private:
         quint16 port;
         QDateTime lastSeen;
         uint errorCount = 0;
+
+        QString getFormatedAddress() const
+        {
+            if (address.protocol() == QAbstractSocket::IPv4Protocol)
+                return address.toString();
+            //пробуем извлечь IPv4 из IPv4-mapped (чтобы не было ::ffff: в начале строки)
+            quint32 ipv4 = address.toIPv4Address();
+            if (ipv4 != 0)
+                return QHostAddress(ipv4).toString();
+            //IPv6
+            return address.toString();
+        }
     };
 
 private:
