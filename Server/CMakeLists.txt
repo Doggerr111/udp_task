@@ -1,67 +1,41 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
+project(Server)
 
-project(Server VERSION 0.1 LANGUAGES CXX)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(Qt5 REQUIRED COMPONENTS Widgets Network)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
-
-set(PROJECT_SOURCES
-        main.cpp
-        udpserver.cpp
-        udpserver.h
-        limitsreader.cpp
-        limitsreader.h
-        packetparser.cpp
-        packetparser.h
-        servercontroller.cpp
-        servercontroller.h
-        serverwindow.cpp
-        serverwindow.h
-        serverwindow.ui
+set(SOURCES
+    main.cpp
+    udpserver.cpp
+    limitsreader.cpp
+    packetparser.cpp
+    servercontroller.cpp
+    serverwindow.cpp
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(Server
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET Server APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-else()
-    if(ANDROID)
-        add_library(Server SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(Server
-            ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
-
-target_link_libraries(Server PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
-set_target_properties(Server PROPERTIES
-    MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+set(HEADERS
+    udpserver.h
+    limitsreader.h
+    packetparser.h
+    servercontroller.h
+    serverwindow.h
 )
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(Server)
-endif()
+add_executable(Server ${SOURCES} ${HEADERS} serverwindow.ui)
+
+# Копируем limits.json в папку сборки
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/limits.json
+               ${CMAKE_CURRENT_BINARY_DIR}/limits.json
+               COPYONLY)
+
+target_include_directories(Server PRIVATE ${CMAKE_SOURCE_DIR}/common)
+
+target_link_libraries(Server
+    Qt5::Widgets
+    Qt5::Network
+)
