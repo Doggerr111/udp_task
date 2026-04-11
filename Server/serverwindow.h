@@ -15,9 +15,18 @@ class ServerWindow : public QMainWindow
 public:
     ServerWindow(QWidget *parent = nullptr);
     ~ServerWindow();
+private:
+    void setupController();
+    void setupWidgets();
+    void sortClientsTable();
+    void updateStatus();
+    void appendSystemMessage(const QString& msg);
+
 
 private slots:
     void on_pushButtonStartStop_clicked();
+
+    void onControllerError(const QString& message);
 
     void onServerStarted();
     void onServerStoped();
