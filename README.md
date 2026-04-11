@@ -23,3 +23,18 @@ cmake ..
 
 # Собираем
 cmake --build .
+```
+## Запуск сервера
+
+```bash
+# Запуск сервера
+./Server/Server      (Linux)
+```
+## Запуск клиента
+```bash
+./Client/Client      (Linux)
+```
+## Тесты
+```bash
+./Tests/test_pack_unpack      (Linux)
+```
