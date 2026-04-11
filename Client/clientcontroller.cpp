@@ -3,9 +3,9 @@
 ClientController::ClientController()
 {
     mUDPClient = new UDPClient(this);
-    connect(mUDPClient, &UDPClient::error, this, &ClientController::onSenderError);
-    connect(mUDPClient, &UDPClient::dataSent, this, &ClientController::onSenderDataSent);
-    connect(mUDPClient, &UDPClient::responseReceived, this, &ClientController::onSenderResponseReceived);
+    connect(mUDPClient, &UDPClient::error, this, &ClientController::onClientError);
+    connect(mUDPClient, &UDPClient::dataSent, this, &ClientController::onPacketSent);
+    connect(mUDPClient, &UDPClient::responseReceived, this, &ClientController::onServerResponseReceived);
     mSendTimer = new QTimer(this);
     connect(mSendTimer, &QTimer::timeout, this, &ClientController::onSendTimer);
 }
@@ -29,7 +29,15 @@ bool ClientController::setServerParams(const QString &ip, quint16 port)
     }
     mUDPClient->startListening();
     mSendTimer->start(1000);
+    emit serverConfigured(ip, port);
     return true;
+}
+
+void ClientController::disconnectFromServer()
+{
+    mUDPClient->clearConnection();
+    mSendTimer->stop();
+    emit configurationCleared();
 }
 
 void ClientController::sendData(const SensorData &data)
@@ -53,17 +61,17 @@ void ClientController::onSendTimer()
     emit dataRequested();
 }
 
-void ClientController::onSenderError(const QString &senderError)
+void ClientController::onClientError(const QString &senderError)
 {
     emit error(senderError);
 }
 
-void ClientController::onSenderDataSent(const QByteArray &data)
+void ClientController::onPacketSent(const QByteArray &data)
 {
     qDebug()<<"data sent:" + QString::number(data.size()) + " bytes";
 }
 
-void ClientController::onSenderResponseReceived(const QByteArray &data)
+void ClientController::onServerResponseReceived(const QByteArray &data)
 {
     qDebug() << "response:" << data.toHex();
 
@@ -84,22 +92,3 @@ void ClientController::onSenderResponseReceived(const QByteArray &data)
 
     emit serverResponseReceived(flag == 1);
 }
-
-//void ClientController::onConnectionRequested(const QString &ip, quint16 port)
-//{
-//    auto addres = QHostAddress(ip);
-//    auto m_udpSocket = new QUdpSocket();
-//    connect(m_udpSocket, &QUdpSocket::readyRead, this, [m_udpSocket](){
-//        while (m_udpSocket->hasPendingDatagrams()) {
-//            QByteArray buffer;
-//            buffer.resize(m_udpSocket->pendingDatagramSize());
-//            m_udpSocket->readDatagram(buffer.data(), buffer.size());
-//            qDebug()<<buffer;
-//        }
-//    });
-
-
-//    // Отправить тестовое сообщение
-//    QByteArray testData = "ping";
-//    m_udpSocket->writeDatagram(testData, addres, port);
-//}
