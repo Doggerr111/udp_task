@@ -7,9 +7,14 @@ ClientWindow::ClientWindow(QWidget *parent)
       mController{std::make_unique<ClientController>()}
 {
     ui->setupUi(this);
+    ui->stackedWidget->setCurrentIndex(CONNECTION_PAGE_INDX);
     connect(mController.get(), &ClientController::error, this, &ClientWindow::onControllerError);
+    connect(mController.get(), &ClientController::serverConfigured, this, &ClientWindow::onServerConfigured);
+    connect(mController.get(), &ClientController::configurationCleared, this, &ClientWindow::onServerConfigurationCleared);
     connect(mController.get(), &ClientController::dataRequested, this, &ClientWindow::onDataRequested);
     connect(mController.get(), &ClientController::serverResponseReceived, this, &ClientWindow::onServerResponseReceived);
+    QIntValidator *portValidator = new QIntValidator(1, 65535, this);
+    ui->lineEditPort->setValidator(portValidator);
 }
 
 ClientWindow::~ClientWindow()
@@ -21,6 +26,39 @@ void ClientWindow::onControllerError(const QString &message)
 {
     QMessageBox::critical(this, "Ошибка", message);
 }
+
+void ClientWindow::onServerConfigured(const QString &ip, quint16 port)
+{
+    ui->stackedWidget->setCurrentIndex(DATA_PAGE_INDX);
+    ui->labelConnectionInfo->setText(QString("Сервер: %1:%2 | Отправка данных...")
+                                         .arg(ip).arg(port));
+}
+
+void ClientWindow::onServerConfigurationCleared()
+{
+    ui->stackedWidget->setCurrentIndex(CONNECTION_PAGE_INDX);
+    ui->textEditResponse->clear();
+}
+
+
+void ClientWindow::on_pushButtonConnect_clicked()
+{
+//    bool ok;
+//    int port = ui->lineEditPort->text().toInt(&ok);
+//    if (!ok || port < 1 || port > 65535)
+//    {
+//        QMessageBox::warning(this, "Ошибка", "Порт должен быть числом от 1 до 65535");
+//        return;
+//    }
+    mController->setServerParams(ui->lineEditIP->text(), ui->lineEditPort->text().toInt());
+}
+
+
+void ClientWindow::on_pushButtonDisconnect_clicked()
+{
+    mController->disconnectFromServer();
+}
+
 
 void ClientWindow::onDataRequested()
 {
@@ -47,11 +85,4 @@ void ClientWindow::onServerResponseReceived(bool isValid)
 }
 
 
-void ClientWindow::on_pushButtonConnect_clicked()
-{
-    if (mController->setServerParams(ui->lineEditIP->text(), ui->lineEditPort->text().toInt()))
-    {
-        ui->stackedWidget->setCurrentIndex(1);
-    }
-}
 

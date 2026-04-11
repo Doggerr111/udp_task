@@ -18,13 +18,18 @@ public:
 public slots:
     void onControllerError(const QString& message);
 private slots:
+    void onServerConfigured(const QString& ip, quint16 port);
+    void onServerConfigurationCleared();
     void onDataRequested();
     void onServerResponseReceived(bool isValid);
     void on_pushButtonConnect_clicked();
-
+    void on_pushButtonDisconnect_clicked();
 
 private:
     Ui::ClientWindow *ui;
     std::unique_ptr<ClientController> mController;
+    static constexpr int CONNECTION_PAGE_INDX = 0;
+    static constexpr int DATA_PAGE_INDX = 1;
+
 };
 #endif // CLIENTWINDOW_H

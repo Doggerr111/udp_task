@@ -24,7 +24,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="connectionPage">
        <property name="sizePolicy">
@@ -338,11 +338,17 @@
                  </item>
                  <item>
                   <widget class="QDoubleSpinBox" name="doubleSpinBoxAcceleration">
+                   <property name="decimals">
+                    <number>1</number>
+                   </property>
                    <property name="minimum">
                     <double>-12.699999999999999</double>
                    </property>
                    <property name="maximum">
                     <double>12.800000000000001</double>
+                   </property>
+                   <property name="singleStep">
+                    <double>0.500000000000000</double>
                    </property>
                   </widget>
                  </item>
