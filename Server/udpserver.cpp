@@ -1,19 +1,20 @@
 #include "udpserver.h"
 UDPServer::UDPServer(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+      mUdpSocket{std::make_unique<QUdpSocket>()}
 {
-    mUdpSocket = new QUdpSocket(this);
+    connect(mUdpSocket.get(), &QUdpSocket::errorOccurred, this, &UDPServer::onSocketError);
 }
 
 bool UDPServer::startServer(quint16 port)
 {
-    if (!mUdpSocket->bind(QHostAddress::Any, port))
-    {
-        emit error(mUdpSocket->errorString());
-        return false;
-    }
+    if (mUdpSocket->state() == QAbstractSocket::BoundState) //уже запущен
+        return true;
 
-    connect(mUdpSocket, &QUdpSocket::readyRead, this, &UDPServer::onReadyRead);
+    if (!mUdpSocket->bind(QHostAddress::Any, port))
+        return false;
+
+    connect(mUdpSocket.get(), &QUdpSocket::readyRead, this, &UDPServer::onReadyRead);
     return true;
 }
 
@@ -22,19 +23,18 @@ void UDPServer::stopServer()
     if (mUdpSocket)
     {
         mUdpSocket->close();
-        disconnect(mUdpSocket, &QUdpSocket::readyRead, this, &UDPServer::onReadyRead);
+        disconnect(mUdpSocket.get(), &QUdpSocket::readyRead, this, &UDPServer::onReadyRead);
     }
 }
 
 bool UDPServer::sendResponse(const QByteArray &response, const QHostAddress &clientAddress, quint16 clientPort)
 {
-     auto size = mUdpSocket->writeDatagram(response, clientAddress, clientPort);
-     return size == response.size() ? true : false;
+     quint64 size = mUdpSocket->writeDatagram(response, clientAddress, clientPort);
+     return size != -1;
 }
 
 void UDPServer::onReadyRead()
 {
-    qDebug()<<"readyRead()";
     while (mUdpSocket->hasPendingDatagrams())
     {
         QByteArray buffer;
@@ -51,4 +51,12 @@ void UDPServer::onReadyRead()
         //отправляем в контроллер
         emit dataReceived(buffer, clientAddress, clientPort);
     }
+}
+
+void UDPServer::onSocketError(QAbstractSocket::SocketError socketError)
+{
+    QString errorMsg = QString("Ошибка сокета %1: %2")
+                           .arg(socketError)
+                           .arg(mUdpSocket->errorString());
+    emit error(errorMsg);
 }
