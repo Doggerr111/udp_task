@@ -1,6 +1,8 @@
 #include "clientwindow.h"
 #include "./ui_clientwindow.h"
 #include <QDateTime>
+#include <QMessageBox>
+
 ClientWindow::ClientWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::ClientWindow),
@@ -8,13 +10,14 @@ ClientWindow::ClientWindow(QWidget *parent)
 {
     ui->setupUi(this);
     ui->stackedWidget->setCurrentIndex(CONNECTION_PAGE_INDX);
+    QIntValidator *portValidator = new QIntValidator(1, 65535, this);
+    ui->lineEditPort->setValidator(portValidator);
+
     connect(mController.get(), &ClientController::error, this, &ClientWindow::onControllerError);
     connect(mController.get(), &ClientController::serverConfigured, this, &ClientWindow::onServerConfigured);
     connect(mController.get(), &ClientController::configurationCleared, this, &ClientWindow::onServerConfigurationCleared);
     connect(mController.get(), &ClientController::dataRequested, this, &ClientWindow::onDataRequested);
     connect(mController.get(), &ClientController::serverResponseReceived, this, &ClientWindow::onServerResponseReceived);
-    QIntValidator *portValidator = new QIntValidator(1, 65535, this);
-    ui->lineEditPort->setValidator(portValidator);
 }
 
 ClientWindow::~ClientWindow()
@@ -43,13 +46,6 @@ void ClientWindow::onServerConfigurationCleared()
 
 void ClientWindow::on_pushButtonConnect_clicked()
 {
-//    bool ok;
-//    int port = ui->lineEditPort->text().toInt(&ok);
-//    if (!ok || port < 1 || port > 65535)
-//    {
-//        QMessageBox::warning(this, "Ошибка", "Порт должен быть числом от 1 до 65535");
-//        return;
-//    }
     mController->setServerParams(ui->lineEditIP->text(), ui->lineEditPort->text().toInt());
 }
 
@@ -77,7 +73,6 @@ void ClientWindow::onServerResponseReceived(bool isValid)
 {
     QString status = isValid ? "КОРРЕКТНО" : "НЕКОРРЕКТНО";
     QString color = isValid ? "green" : "red";
-
     QString timestamp = QDateTime::currentDateTime().toString("hh:mm:ss");
     QString html = QString("<span style='color:%1;'>[%2] Ответ сервера: %3</span>")
             .arg(color).arg(timestamp).arg(status);
