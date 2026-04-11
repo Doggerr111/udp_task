@@ -3,16 +3,21 @@
 #include "packetparser.h"
 #include "datatypes.h"
 ServerController::ServerController()
+    : mServer{std::make_unique<UDPServer>()},
+      mClientTimer{std::make_unique<QTimer>()}
 {
-    mServer = new UDPServer(this);
-    connect(mServer, &UDPServer::dataReceived, this, &ServerController::onServerDataReceived);
-
-    mClientTimer = new QTimer(this);
-    connect(mClientTimer, &QTimer::timeout, this, &ServerController::onClientTimer);
+    connect(mServer.get(), &UDPServer::dataReceived, this, &ServerController::onServerDataReceived);
+    connect(mServer.get(), &UDPServer::error, this, &ServerController::onServerError);
+    connect(mClientTimer.get(), &QTimer::timeout, this, &ServerController::onClientTimer);
 }
 
 void ServerController::startServer(quint16 port)
 {
+    if (port == 0 || port > 65535)
+    {
+        emit error("Порт должен быть в диапазоне 1-65535");
+        return;
+    }
     if (!mServer->startServer(port)) return;
 
     QString configPath = QCoreApplication::applicationDirPath() + "/limits.json";
@@ -20,11 +25,9 @@ void ServerController::startServer(quint16 port)
     if (limitsOpt.has_value())
     {
         mDataLimits = limitsOpt.value();
-        mClientTimer->start(10000); //каждый 10с. проверяем клиентов
+        mClientTimer->start(CLEANUP_INTERVAL_MS); //проверка клиентов
         emit serverStarted();
     }
-
-
 }
 
 void ServerController::stopServer()
@@ -39,23 +42,18 @@ void ServerController::stopServer()
 //при получении сообщения от клиента сервером
 void ServerController::onServerDataReceived(const QByteArray &data, const QHostAddress &clientAddress, quint16 clientPort)
 {
-
     QString key = clientAddress.toString() + ":" + QString::number(clientPort);
-
     bool isNew = !mClients.contains(key);
     ClientInfo& client = mClients[key];
     client.address = clientAddress;
     client.port = clientPort;
     client.lastSeen = QDateTime::currentDateTime();
-
     auto sensorDataOpt = PacketParser::parse(data);
-
     SensorData sensorData;
     if (sensorDataOpt.has_value())
     {
         sensorData = sensorDataOpt.value();
         bool valid = checkLimits(sensorData);
-
         QByteArray response;
         response.append(char(0));   // идентификатор сообщения
         response.append(char(valid ? 1 : 0));  // флаг корректности
@@ -63,13 +61,15 @@ void ServerController::onServerDataReceived(const QByteArray &data, const QHostA
         emit clientDataReceived(clientAddress.toString(), clientPort, sensorData, valid);
         if (!valid) client.errorCount++;
     }
-
     if (isNew)
         emit clientAdded(clientAddress.toString(), clientPort, client.errorCount);
     else
         emit clientUpdated(clientAddress.toString(), clientPort, client.errorCount);
+}
 
-
+void ServerController::onServerError(const QString &message)
+{
+    emit error(message);
 }
 
 void ServerController::onClientTimer()
@@ -77,10 +77,11 @@ void ServerController::onClientTimer()
     QDateTime now = QDateTime::currentDateTime();
     for (auto it = mClients.begin(); it != mClients.end();)
     {
-        if (it->lastSeen.secsTo(now) > 10)  // удаляем после 10 секунд бездействия
+        if (it->lastSeen.secsTo(now) > INACTIVE_TIMEOUT_SEC)  // удаляем после бездействия
         {
-            it = mClients.erase(it);
             emit clientRemoved(it->address.toString(), it->port);
+            it = mClients.erase(it);
+
         }
         else
             ++it;
@@ -89,11 +90,12 @@ void ServerController::onClientTimer()
 
 bool ServerController::checkLimits(const SensorData &data) const noexcept
 {
+    static constexpr double LIMITS_EPS = 1e-5;
     return data.x >= mDataLimits.xMin && data.x <= mDataLimits.xMax &&
            data.y >= mDataLimits.yMin && data.y <= mDataLimits.yMax &&
            data.v >= mDataLimits.vMin && data.v <= mDataLimits.vMax &&
            data.m >= mDataLimits.mMin && data.m <= mDataLimits.mMax &&
            data.s >= mDataLimits.sMin && data.s <= mDataLimits.sMax &&
-           data.a >= mDataLimits.aMin && data.a <= mDataLimits.aMax &&
+           data.a + LIMITS_EPS >= mDataLimits.aMin && data.a - LIMITS_EPS <= mDataLimits.aMax &&
            data.p >= mDataLimits.pMin && data.p <= mDataLimits.pMax;
 }

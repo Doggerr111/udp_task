@@ -12,18 +12,19 @@ public:
     ServerController();
     void startServer(quint16 port);
     void stopServer();
-private slots:
-    void onServerDataReceived(const QByteArray& data, const QHostAddress& clientAddress,
-                              quint16 clientPort);
-    void onClientTimer();
+
 private:
     bool checkLimits(const SensorData& data) const noexcept;
 
+private slots:
+    void onServerDataReceived(const QByteArray& data, const QHostAddress& clientAddress, quint16 clientPort);
+    void onServerError(const QString& message);
+    void onClientTimer();
+
 signals:
+    void error(const QString& message);
     void serverStarted();
     void serverStopped();
-
-
     void clientRemoved(const QString& ip, quint16 port);
     void clientAdded  (const QString& ip, quint16 port, uint errorCount);
     void clientUpdated(const QString& ip, quint16 port, uint errorCount);
@@ -35,20 +36,18 @@ private:
         QHostAddress address;
         quint16 port;
         QDateTime lastSeen;
-        uint errorCount;
+        uint errorCount = 0;
     };
 
 private:
-    UDPServer* mServer;
-    QTimer* mClientTimer; //для отключения клиентов
+    std::unique_ptr<UDPServer> mServer;
+    std::unique_ptr<QTimer> mClientTimer; //для отключения клиентов
     LimitsReader::Limits mDataLimits;
     //строка IP:port как ключ
     QHash<QString, ClientInfo> mClients;
 
-
-
-
-
+    static constexpr int INACTIVE_TIMEOUT_SEC = 5;   // клиент считается неактивным после 5 секунд бездействия
+    static constexpr int CLEANUP_INTERVAL_MS = 3000; // проверка клиентов каждые 3 секунды
 };
 
 #endif // SERVERCONTROLLER_H
