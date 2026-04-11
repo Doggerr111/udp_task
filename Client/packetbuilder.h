@@ -9,6 +9,8 @@ public:
     static QByteArray pack(const SensorData& data);
 private:
     PacketBuilder() = delete;
+    PacketBuilder(const PacketBuilder&) = delete;
+    PacketBuilder& operator=(const PacketBuilder&) = delete;
 };
 
 #endif // PACKETBUILDER_H
