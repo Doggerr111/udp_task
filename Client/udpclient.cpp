@@ -44,12 +44,8 @@ void UDPClient::sendData(const QByteArray &bytes)
 void UDPClient::startListening()
 {
     if (mSocket->state() == QAbstractSocket::BoundState) return; //если уже слушаем
+    if (!mSocket->bind()) return;
 
-    if (!mSocket->bind())
-    {
-        emit error("Не удалось привязать сокет для получения ответов");
-        return;
-    }
     disconnect(mSocket.get(), &QUdpSocket::readyRead, this, &UDPClient::onReadyRead);
     connect(mSocket.get(), &QUdpSocket::readyRead, this, &UDPClient::onReadyRead);
 }
@@ -68,7 +64,7 @@ void UDPClient::onReadyRead()
 
 void UDPClient::onSocketError(QAbstractSocket::SocketError socketError)
 {
-    QString errorMsg = QString("Сокет ошибка %1: %2")
+    QString errorMsg = QString("Ошибка сокета %1: %2")
                            .arg(socketError)
                            .arg(mSocket->errorString());
     emit error(errorMsg);
