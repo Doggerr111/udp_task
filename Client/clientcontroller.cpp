@@ -1,36 +1,36 @@
 #include "clientcontroller.h"
 #include "packetbuilder.h"
+#include <QDateTime>
 ClientController::ClientController()
+    : mUDPClient(std::make_unique<UDPClient>()),  //удаляем сами, без parent
+      mSendTimer(std::make_unique<QTimer>())
 {
-    mUDPClient = new UDPClient(this);
-    connect(mUDPClient, &UDPClient::error, this, &ClientController::onClientError);
-    connect(mUDPClient, &UDPClient::dataSent, this, &ClientController::onPacketSent);
-    connect(mUDPClient, &UDPClient::responseReceived, this, &ClientController::onServerResponseReceived);
-    mSendTimer = new QTimer(this);
-    connect(mSendTimer, &QTimer::timeout, this, &ClientController::onSendTimer);
+    connect(mUDPClient.get(), &UDPClient::error, this, &ClientController::onNetworkError);
+    connect(mUDPClient.get(), &UDPClient::dataSent, this, &ClientController::onPacketSent);
+    connect(mUDPClient.get(), &UDPClient::responseReceived, this, &ClientController::onServerResponseReceived);
+    connect(mSendTimer.get(), &QTimer::timeout, this, &ClientController::onSendTimer);
 }
 
-bool ClientController::setServerParams(const QString &ip, quint16 port)
+void ClientController::setServerParams(const QString &ip, quint16 port)
 {
     if (ip.isEmpty())
     {
         emit error("IP-адрес не может быть пустым");
-        return false;
+        return;
     }
     if (port == 0 || port > 65535)
     {
         emit error("Порт должен быть в диапазоне 1-65535");
-        return false;
+        return;
     }
     if (!mUDPClient->setServerParams(ip, port))
     {
         emit error("Неверный IP-адрес");
-        return false;
+        return;
     }
     mUDPClient->startListening();
     mSendTimer->start(1000);
     emit serverConfigured(ip, port);
-    return true;
 }
 
 void ClientController::disconnectFromServer()
@@ -42,40 +42,33 @@ void ClientController::disconnectFromServer()
 
 void ClientController::sendData(const SensorData &data)
 {
-    qDebug()<<"sendData() called";
     auto byteArray = PacketBuilder::pack(data);
     mUDPClient->sendData(byteArray);
 }
 
-void ClientController::onDataReceived(const SensorData &data)
-{
-
-    auto byteArray = PacketBuilder::pack(data);
-    mUDPClient->sendData(byteArray);
-
-}
 
 void ClientController::onSendTimer()
 {
-    qDebug()<<"onSendTimer() called";
     emit dataRequested();
 }
 
-void ClientController::onClientError(const QString &senderError)
+void ClientController::onNetworkError(const QString &senderError)
 {
     emit error(senderError);
 }
 
 void ClientController::onPacketSent(const QByteArray &data)
 {
-    qDebug()<<"data sent:" + QString::number(data.size()) + " bytes";
+    QString timestamp = QDateTime::currentDateTime().toString("hh:mm:ss");
+    qDebug() << "[" << timestamp << "] Packet sent: " << data.size() << " bytes";
 }
 
 void ClientController::onServerResponseReceived(const QByteArray &data)
 {
-    qDebug() << "response:" << data.toHex();
-
-    if (data.size() < 2)
+    constexpr int RESPONSE_MIN_SIZE = 2;
+    constexpr uint8_t RESPONSE_MSG_ID = 0;
+    qDebug() << "Response received:" << data.toHex();
+    if (data.size() < RESPONSE_MIN_SIZE)
     {
         emit error("Неверный ответ сервера");
         return;
@@ -83,8 +76,7 @@ void ClientController::onServerResponseReceived(const QByteArray &data)
 
     uint8_t msgId = static_cast<uint8_t>(data[0]);
     uint8_t flag = static_cast<uint8_t>(data[1]);
-
-    if (msgId != 0)
+    if (msgId != RESPONSE_MSG_ID)
     {
         emit error("Неизвестный тип сообщения");
         return;

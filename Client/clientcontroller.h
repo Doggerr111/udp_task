@@ -10,17 +10,13 @@ class ClientController: public QObject
     Q_OBJECT
 public:
     ClientController();
-    bool setServerParams(const QString& ip, quint16 port);
+    ~ClientController() = default;
+    void setServerParams(const QString& ip, quint16 port);
     void disconnectFromServer();
     void sendData(const SensorData& data);
-private:
-    UDPClient* mUDPClient;
-    QTimer*    mSendTimer; //для отправки с частотой 1 гц
-public slots:
-    void onDataReceived(const SensorData& data); //получение пользовательского ввода с UI
 private slots:
     void onSendTimer();
-    void onClientError(const QString& senderError);
+    void onNetworkError(const QString& senderError);
     void onPacketSent(const QByteArray& data);
     void onServerResponseReceived(const QByteArray& data);
 signals:
@@ -29,6 +25,10 @@ signals:
     void configurationCleared();
     void dataRequested(); //сигнал для UI, вызывается по таймеру
     void serverResponseReceived(bool isValid);
+
+private:
+    std::unique_ptr<UDPClient> mUDPClient;
+    std::unique_ptr<QTimer> mSendTimer; //для отправки с частотой 1 гц
 
 };
 
