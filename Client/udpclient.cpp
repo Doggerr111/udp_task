@@ -1,9 +1,11 @@
 #include "udpclient.h"
 
 UDPClient::UDPClient(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+      mServerPort{0},
+      mSocket{std::make_unique<QUdpSocket>()}
 {
-    mSocket = new QUdpSocket(parent);
+    connect(mSocket.get(), &QUdpSocket::errorOccurred, this, &UDPClient::onSocketError);
 }
 
 bool UDPClient::setServerParams(const QString &ip, quint16 port)
@@ -15,6 +17,19 @@ bool UDPClient::setServerParams(const QString &ip, quint16 port)
     mServerPort = port;
     return true;
 }
+
+void UDPClient::clearConnection()
+{
+    if (mSocket)
+    {
+        //отключаем прием данных
+        disconnect(mSocket.get(), &QUdpSocket::readyRead, this, &UDPClient::onReadyRead);
+        mSocket->close();
+    }
+    mServerAddress = QHostAddress();
+    mServerPort = 0;
+}
+
 
 void UDPClient::sendData(const QByteArray &bytes)
 {
@@ -28,12 +43,15 @@ void UDPClient::sendData(const QByteArray &bytes)
 
 void UDPClient::startListening()
 {
+    if (mSocket->state() == QAbstractSocket::BoundState) return; //если уже слушаем
+
     if (!mSocket->bind())
     {
         emit error("Не удалось привязать сокет для получения ответов");
         return;
     }
-    connect(mSocket, &QUdpSocket::readyRead, this, &UDPClient::onReadyRead);
+    disconnect(mSocket.get(), &QUdpSocket::readyRead, this, &UDPClient::onReadyRead);
+    connect(mSocket.get(), &QUdpSocket::readyRead, this, &UDPClient::onReadyRead);
 }
 
 void UDPClient::onReadyRead()
@@ -43,8 +61,16 @@ void UDPClient::onReadyRead()
         QByteArray buffer;
         buffer.resize(mSocket->pendingDatagramSize());
         mSocket->readDatagram(buffer.data(), buffer.size());
-        qDebug()<<buffer;
+        qDebug() << "Response received:" << buffer.toHex();
         emit responseReceived(buffer);
     }
+}
+
+void UDPClient::onSocketError(QAbstractSocket::SocketError socketError)
+{
+    QString errorMsg = QString("Сокет ошибка %1: %2")
+                           .arg(socketError)
+                           .arg(mSocket->errorString());
+    emit error(errorMsg);
 }
 

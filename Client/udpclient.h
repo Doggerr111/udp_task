@@ -8,12 +8,13 @@ class UDPClient: public QObject
 public:
     UDPClient(QObject* parent = nullptr);
     bool setServerParams(const QString& ip, quint16 port);
-    void sendData(const QByteArray& bytes);
+    void clearConnection();
     void startListening();
+    void sendData(const QByteArray& bytes);
 
 private slots:
     void onReadyRead();
-
+    void onSocketError(QAbstractSocket::SocketError socketError);
 
 signals:
     void error(const QString& message);
@@ -23,7 +24,7 @@ signals:
 private:
     quint16 mServerPort;
     QHostAddress mServerAddress;
-    QUdpSocket* mSocket;
+    std::unique_ptr<QUdpSocket> mSocket;
 };
 
 #endif // UDPClient_H
