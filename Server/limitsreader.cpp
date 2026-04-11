@@ -7,7 +7,6 @@
 
 std::optional<LimitsReader::Limits> LimitsReader::read(const QString &filename)
 {
-
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly))
     {
@@ -39,66 +38,23 @@ std::optional<LimitsReader::Limits> LimitsReader::read(const QString &filename)
 
     QJsonObject limitsObj = limitsArray[0].toObject();
 
-    QJsonArray   xArray = limitsObj["X"].toArray();
-    if (xArray.size() >= 2)
-    {
-        limits.xMin = xArray[0].toInt();
-        limits.xMax = xArray[1].toInt();
-    }
-    else
-    {
-        qDebug() << "Ошибка: массив X должен содержать 2 значения";
-        return std::nullopt;
-    }
+    auto readRange = [&](const QString& key, int& minVal, int& maxVal) -> bool {
+        QJsonArray arr = limitsObj[key].toArray();
+        if (arr.size() >= 2) {
+            minVal = arr[0].toInt();
+            maxVal = arr[1].toInt();
+            return true;
+        }
+        qDebug() << "Ошибка: массив" << key << "должен содержать 2 значения";
+        return false;
+    };
 
-    QJsonArray   yArray = limitsObj["Y"].toArray();
-    if (yArray.size() >= 2)
-    {
-        limits.yMin = yArray[0].toInt();
-        limits.yMax = yArray[1].toInt();
-    }
-    else
-    {
-        qDebug() << "Ошибка: массив Y должен содержать 2 значения";
-        return std::nullopt;
-    }
-
-    QJsonArray   vArray = limitsObj["V"].toArray();
-    if (vArray.size() >= 2)
-    {
-        limits.vMin = vArray[0].toInt();
-        limits.vMax = vArray[1].toInt();
-    }
-    else
-    {
-        qDebug() << "Ошибка: массив V должен содержать 2 значения";
-        return std::nullopt;
-    }
-
-
-    QJsonArray   mArray = limitsObj["M"].toArray();
-    if (mArray.size() >= 2)
-    {
-        limits.mMin = mArray[0].toInt();
-        limits.mMax = mArray[1].toInt();
-    }
-    else
-    {
-        qDebug() << "Ошибка: массив M должен содержать 2 значения";
-        return std::nullopt;
-    }
-
-    QJsonArray   sArray = limitsObj["S"].toArray();
-    if (sArray.size() >= 2)
-    {
-        limits.sMin = sArray[0].toInt();
-        limits.sMax = sArray[1].toInt();
-    }
-    else
-    {
-        qDebug() << "Ошибка: массив S должен содержать 2 значения";
-        return std::nullopt;
-    }
+    if (!readRange("X", limits.xMin, limits.xMax)) return std::nullopt;
+    if (!readRange("Y", limits.yMin, limits.yMax)) return std::nullopt;
+    if (!readRange("V", limits.vMin, limits.vMax)) return std::nullopt;
+    if (!readRange("M", limits.mMin, limits.mMax)) return std::nullopt;
+    if (!readRange("S", limits.sMin, limits.sMax)) return std::nullopt;
+    if (!readRange("P", limits.pMin, limits.pMax)) return std::nullopt;
 
     QJsonArray   aArray = limitsObj["A"].toArray();
     if (aArray.size() >= 2)
@@ -108,19 +64,7 @@ std::optional<LimitsReader::Limits> LimitsReader::read(const QString &filename)
     }
     else
     {
-        qDebug() << "Ошибка: массив M должен содержать 2 значения";
-        return std::nullopt;
-    }
-
-    QJsonArray   pArray = limitsObj["P"].toArray();
-    if (pArray.size() >= 2)
-    {
-        limits.pMin = pArray[0].toInt();
-        limits.pMax = pArray[1].toInt();
-    }
-    else
-    {
-        qDebug() << "Ошибка: массив P должен содержать 2 значения";
+        qDebug() << "Ошибка: массив A должен содержать 2 значения";
         return std::nullopt;
     }
 

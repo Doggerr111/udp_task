@@ -19,6 +19,8 @@ public:
     static std::optional<Limits> read(const QString& filename);
 private:
     LimitsReader() = delete;
+    LimitsReader(const LimitsReader&) = delete;
+    LimitsReader& operator=(const LimitsReader&) = delete;
 };
 
 #endif // LIMITSREADER_H
