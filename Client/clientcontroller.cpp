@@ -30,7 +30,7 @@ void ClientController::setServerParams(const QString &ip, quint16 port)
     }
     mUDPClient->startListening();
     mSendTimer->start(1000);
-    emit serverConfigured(ip, port);
+    emit serverConfigured(getFormattedServerIp(), port);
 }
 
 void ClientController::disconnectFromServer()
@@ -44,6 +44,19 @@ void ClientController::sendData(const SensorData &data)
 {
     auto byteArray = PacketBuilder::pack(data);
     mUDPClient->sendData(byteArray);
+}
+
+QString ClientController::getFormattedServerIp() const
+{
+    auto address = mUDPClient->getServerAddress();
+    if (address.protocol() == QAbstractSocket::IPv4Protocol)
+        return address.toString();
+    //пробуем извлечь IPv4 из IPv4-mapped (чтобы не было ::ffff: в начале строки)
+    quint32 ipv4 = address.toIPv4Address();
+    if (ipv4 != 0)
+        return QHostAddress(ipv4).toString();
+    //IPv6
+    return address.toString();
 }
 
 

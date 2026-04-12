@@ -1,10 +1,10 @@
 #ifndef CLIENTCONTROLLER_H
 #define CLIENTCONTROLLER_H
-
 #include <QUdpSocket>
 #include <QTimer>
 #include "udpclient.h"
-#include "datatypes.h"
+
+class SensorData;
 class ClientController: public QObject
 {
     Q_OBJECT
@@ -14,6 +14,10 @@ public:
     void setServerParams(const QString& ip, quint16 port);
     void disconnectFromServer();
     void sendData(const SensorData& data);
+
+private:
+    QString getFormattedServerIp() const;
+
 private slots:
     void onSendTimer();
     void onNetworkError(const QString& senderError);
