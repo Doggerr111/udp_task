@@ -1,4 +1,6 @@
 # UDP Client-Server
+[![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/)
+[![Qt](https://img.shields.io/badge/Qt-5.15-green.svg)](https://www.qt.io/)
 
 Клиент-серверное приложение для передачи данных по протоколу UDP
 
