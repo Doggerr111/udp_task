@@ -1,5 +1,6 @@
 #include "clientwindow.h"
 #include "./ui_clientwindow.h"
+#include "datatypes.h"
 #include <QDateTime>
 #include <QMessageBox>
 

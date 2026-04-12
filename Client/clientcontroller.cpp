@@ -1,5 +1,6 @@
 #include "clientcontroller.h"
 #include "packetbuilder.h"
+#include "datatypes.h"
 #include <QDateTime>
 ClientController::ClientController()
     : mUDPClient(std::make_unique<UDPClient>()),  //удаляем сами, без parent
