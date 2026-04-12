@@ -11,7 +11,6 @@ QT_END_NAMESPACE
 class ServerWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     ServerWindow(QWidget *parent = nullptr);
     ~ServerWindow();
@@ -21,7 +20,6 @@ private:
     void sortClientsTable();
     void updateStatus();
     void appendSystemMessage(const QString& msg);
-
 
 private slots:
     void on_pushButtonStartStop_clicked();
