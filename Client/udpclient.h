@@ -8,6 +8,8 @@ class UDPClient: public QObject
 public:
     UDPClient(QObject* parent = nullptr);
     bool setServerParams(const QString& ip, quint16 port);
+    quint16 getServerPort() const noexcept { return mServerPort; };
+    QHostAddress getServerAddress() const noexcept { return mServerAddress; };
     void clearConnection();
     void startListening();
     void sendData(const QByteArray& bytes);
