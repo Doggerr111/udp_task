@@ -12,8 +12,8 @@
 
 ```bash
 # Клонируем репозиторий
-git clone https://github.com/ваш_аккаунт/test_task.git
-cd test_task
+git clone https://github.com/Doggerr111/udp_task.git
+cd udp_task
 
 # Создаём папку для сборки
 mkdir build && cd build
